@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import java.io.IOException;
 public class GraphActivity extends Activity {
 
     public static final String PRESSURE_DATA_FILE = "pressure.data";
+    private TextView sampleCountView;
     private GraphView graphView;
     private File pressureDataFile;
 
@@ -21,6 +23,7 @@ public class GraphActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
         graphView = (GraphView) findViewById(R.id.graph_view);
+        sampleCountView = (TextView) findViewById(R.id.sample_count_view);
 
         pressureDataFile = new File(getFilesDir(), PRESSURE_DATA_FILE);
 
@@ -45,6 +48,7 @@ public class GraphActivity extends Activity {
         try {
             Model model = Model.load(pressureDataFile);
             graphView.setModel(model);
+            sampleCountView.setText("Sample: " + model.pressures.size());
         } catch (IOException e) {
             e.printStackTrace();
         }

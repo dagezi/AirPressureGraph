@@ -21,6 +21,9 @@ public class SensingService extends Service implements SensorEventListener {
 
     private File outputFile;
 
+    private long lastSensedTicked = -1;
+    private long sensingIntervalInMill = 30 * 1000;
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         sensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
@@ -38,13 +41,18 @@ public class SensingService extends Service implements SensorEventListener {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        try {
-            DataOutputStream os = new DataOutputStream(new FileOutputStream(outputFile, true));
-            os.writeLong(System.currentTimeMillis());
-            os.writeDouble(event.values[0]);
-            os.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+
+        long currentTick = System.currentTimeMillis();
+        if (lastSensedTicked + sensingIntervalInMill <= currentTick) {
+            try {
+                DataOutputStream os = new DataOutputStream(new FileOutputStream(outputFile, true));
+                os.writeLong(currentTick);
+                os.writeDouble(event.values[0]);
+                os.close();
+                lastSensedTicked = currentTick;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
