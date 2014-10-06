@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.Locale;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,9 +22,7 @@ public class Model {
     }
 
     public void save(File file) throws IOException {
-        ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream(file));
-
-        os.writeInt(pressures.size());
+        DataOutputStream os = new DataOutputStream(new FileOutputStream(file));
 
         for (Map.Entry<Long, Double> entry : pressures.entrySet()) {
             os.writeLong(entry.getKey());
@@ -35,12 +33,11 @@ public class Model {
     }
 
     public static Model load(File file) throws IOException {
-        ObjectInputStream is = new ObjectInputStream(new FileInputStream(file));
+        DataInputStream is = new DataInputStream(new FileInputStream(file));
 
-        int count = is.readInt();
         Model model = new Model();
 
-        while (count > 0) {
+        while (is.available() >= 4) {
             long time = is.readLong();
             double pressure = is.readDouble();
             model.addData(time, pressure);

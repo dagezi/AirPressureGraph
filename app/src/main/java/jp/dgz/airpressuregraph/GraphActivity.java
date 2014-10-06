@@ -1,6 +1,7 @@
 package jp.dgz.airpressuregraph;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,29 +13,40 @@ import java.io.IOException;
 public class GraphActivity extends Activity {
 
     public static final String PRESSURE_DATA_FILE = "pressure.data";
+    private GraphView graphView;
+    private File pressureDataFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_graph);
-        GraphView graphView = (GraphView) findViewById(R.id.graph_view);
+        graphView = (GraphView) findViewById(R.id.graph_view);
 
-        File file = new File(getFilesDir(), PRESSURE_DATA_FILE);
+        pressureDataFile = new File(getFilesDir(), PRESSURE_DATA_FILE);
 
         Model model = new Model();
         addDummy(model);
-
-        try {
-            model = Model.load(file);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         graphView.setModel(model);
+
+        Intent sensingService = new Intent(this, SensingService.class);
+        startService(sensingService);
     }
 
     private void addDummy(Model model) {
         for (int i = -10; i <= 0; i++) {
             model.addData(System.currentTimeMillis() + i * 5 * 60 * 1000, 980 - i * 5);
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        try {
+            Model model = Model.load(pressureDataFile);
+            graphView.setModel(model);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
